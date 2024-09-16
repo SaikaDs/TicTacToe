@@ -8,8 +8,9 @@ public class LevelDropDown : MonoBehaviour
 {
     [SerializeField]
     OpponentAI opponentAI;
-
     TMP_Dropdown dropdown;
+    [SerializeField]
+    GameObject title;
 
     private void Awake()
     {
@@ -24,7 +25,9 @@ public class LevelDropDown : MonoBehaviour
 
     void OnGameStateChange(GameState state)
     {
-        dropdown.interactable = state == GameState.Ready;
+        bool ready = state == GameState.Ready;
+        dropdown.interactable = ready;
+        title.SetActive(ready);
     }
 
     void OnDropdownValueChanged(int index)

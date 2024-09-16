@@ -21,6 +21,7 @@ public class GameOverPanel : MonoBehaviour
         GameSystem.Instance.onGameStateChange += OnGameStateChange;
     }
 
+
     void OnGameStateChange(GameState state)
     {
         if (state == GameState.CrossWinner)

@@ -103,9 +103,9 @@ public class GameSystem : MonoBehaviour
     public Action<ChessType> onChooseCamp;
 
     /// <summary>
-    /// 当已连成线，广播连线信息，参数1指示类型，参数2指示对应行号/列号
+    /// 当已连成线，广播连线信息，参数0指示阵营，参数1指示类型，参数2指示对应行号/列号
     /// </summary>
-    public Action<ConnectedType, int> onConnect;
+    public Action<ChessType, ConnectedType, int> onConnect;
 
     /// <summary>
     /// 玩家阵营
@@ -207,13 +207,13 @@ public class GameSystem : MonoBehaviour
         var result = Judging(boardModel);
         if (result.resultType == TurnResultType.CircleWinner)
         {
-            onConnect?.Invoke(result.connectedType, result.num);
+            onConnect?.Invoke(ChessType.Circle, result.connectedType, result.num);
             state = GameState.CircleWinner;
             return;
         }
         else if (result.resultType == TurnResultType.CrossWinner)
         {
-            onConnect?.Invoke(result.connectedType, result.num);
+            onConnect?.Invoke(ChessType.Cross, result.connectedType, result.num);
             state = GameState.CrossWinner;
             return;
         }
