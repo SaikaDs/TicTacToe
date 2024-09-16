@@ -1779,6 +1779,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   waitTime: 1
+  randomRate: 0
 --- !u!1 &709729805
 GameObject:
   m_ObjectHideFlags: 0

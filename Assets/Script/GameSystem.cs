@@ -30,6 +30,39 @@ public enum ConnectedType
     AntiDiagonal,  //反对角线（右上到左下）
 }
 
+
+public enum TurnResultType
+{
+    CrossWinner,
+    CircleWinner,
+    Draw,
+    Continue,
+}
+
+public struct TurnResult
+{
+    public TurnResultType resultType;
+    public ConnectedType connectedType;  //如果已连成线，指示连线情况
+    public int num;  //如果是横竖连线，指定行号/列号
+
+    public void SetResultByChessType(ChessType chess_type)
+    {
+        if (chess_type == ChessType.Cross)
+        {
+            resultType = TurnResultType.CrossWinner;
+        }
+        else if (chess_type == ChessType.Circle)
+        {
+            resultType = TurnResultType.CircleWinner;
+        }
+        else
+        {
+            Debug.LogError(string.Format("invalid chess_type in SetResultByChessType: {0}", chess_type));
+        }
+    }
+}
+
+
 public class GameSystem : MonoBehaviour
 {
     public static GameSystem Instance { get; private set; }
@@ -88,8 +121,18 @@ public class GameSystem : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        boardModel = new List<List<ChessType>>();
-        boardModel.Capacity = rowColCount;
+        boardModel = GenerateEmptyBoardModel();
+    }
+
+    void Start()
+    {
+        RestartGame();
+    }
+
+    public static List<List<ChessType>> GenerateEmptyBoardModel()
+    {
+        List<List<ChessType>> board = new List<List<ChessType>>();
+        board.Capacity = rowColCount;
         for (int i = 0; i < rowColCount; i++)
         {
             List<ChessType> row = new List<ChessType>();
@@ -98,13 +141,9 @@ public class GameSystem : MonoBehaviour
             {
                 row.Add(ChessType.Empty);
             }
-            boardModel.Add(row);
+            board.Add(row);
         }
-    }
-
-    void Start()
-    {
-        RestartGame();
+        return board;
     }
 
     public void RestartGame()
@@ -150,7 +189,11 @@ public class GameSystem : MonoBehaviour
         }
         //检查目标点是否有效
         var target_type = boardModel[row][col];
-        if (target_type != ChessType.Empty) return;
+        if (target_type != ChessType.Empty)
+        {
+            Debug.LogError(string.Format("PlaceAPieace at non-empty place {0} {1}", row, col));
+            return;
+        }
         //落子
         boardModel[row][col] = chess_type;
         //广播
@@ -159,121 +202,27 @@ public class GameSystem : MonoBehaviour
         PushGameState();
     }
 
-    void ChangeStateByWinnerChessType(ChessType chess_type)
-    {
-        if (chess_type == ChessType.Cross)
-        {
-            state = GameState.CrossWinner;
-        }
-        else if (chess_type == ChessType.Circle)
-        {
-            state = GameState.CircleWinner;
-        }
-        else
-        {
-            Debug.LogError(string.Format("Invalid Chess Type Connected {0}", chess_type));
-            state = GameState.CircleWinner;  //防止阻塞
-        }
-    }
-
     void PushGameState()
     {
-        bool has_empty = false;  // 判平局用
-        ChessType flagged_chess_type;
-        bool connected;
-        #region 遍历行和判断是否已下满（不break，全量遍历）
-        for (int i = 0; i < rowColCount; i++)
+        var result = Judging(boardModel);
+        if (result.resultType == TurnResultType.CircleWinner)
         {
-            flagged_chess_type = boardModel[i][0];
-            connected = true;
-            for (int j = 0; j < rowColCount; j++)
-            {
-                var chess_type = boardModel[i][j];
-                if (chess_type == ChessType.Empty)
-                {
-                    has_empty = true;
-                }
-                if (chess_type == ChessType.Empty || chess_type != flagged_chess_type)
-                {
-                    connected = false;
-                }
-            }
-            if (connected)
-            {
-                onConnect?.Invoke(ConnectedType.Row, i);
-                ChangeStateByWinnerChessType(flagged_chess_type);
-                return;
-            }
-        }
-        #endregion
-        #region 遍历列
-        for (int i = 0; i < rowColCount; i++)
-        {
-            flagged_chess_type = boardModel[0][i];
-            connected = true;
-            for (int j = 0; j < rowColCount; j++)
-            {
-                var chess_type = boardModel[j][i];
-                if (chess_type == ChessType.Empty || chess_type != flagged_chess_type)
-                {
-                    connected = false;
-                    break;
-                }
-            }
-            if (connected)
-            {
-                onConnect?.Invoke(ConnectedType.Col, i);
-                ChangeStateByWinnerChessType(flagged_chess_type);
-                return;
-            }
-        }
-        #endregion
-        #region 查看正对角线
-        flagged_chess_type = boardModel[0][0];
-        connected = true;
-        for (int i = 0; i < rowColCount; i++)
-        {
-            var chess_type = boardModel[i][i];
-            if (chess_type == ChessType.Empty || chess_type != flagged_chess_type)
-            {
-                connected = false;
-                break;
-            }
-        }
-        if (connected)
-        {
-            onConnect?.Invoke(ConnectedType.Diagonal, 0);
-            ChangeStateByWinnerChessType(flagged_chess_type);
+            onConnect?.Invoke(result.connectedType, result.num);
+            state = GameState.CircleWinner;
             return;
         }
-        #endregion
-        #region 查看反对角线
-        flagged_chess_type = boardModel[rowColCount - 1][0];
-        connected = true;
-        for (int i = 0; i < rowColCount; i++)
+        else if (result.resultType == TurnResultType.CrossWinner)
         {
-            var chess_type = boardModel[rowColCount - 1 - i][i];
-            if (chess_type == ChessType.Empty || chess_type != flagged_chess_type)
-            {
-                connected = false;
-                break;
-            }
-        }
-        if (connected)
-        {
-            onConnect?.Invoke(ConnectedType.AntiDiagonal, 0);
-            ChangeStateByWinnerChessType(flagged_chess_type);
+            onConnect?.Invoke(result.connectedType, result.num);
+            state = GameState.CrossWinner;
             return;
         }
-        #endregion
-        #region 判平局
-        if (!has_empty)
+        else if (result.resultType == TurnResultType.Draw)
         {
             state = GameState.Draw;
             return;
         }
-        #endregion
-        #region 下一回合
+        //下一回合
         if (state == GameState.CrossTurn)
         {
             state = GameState.CircleTurn;
@@ -287,6 +236,125 @@ public class GameSystem : MonoBehaviour
             Debug.LogError(string.Format("Invalid Game State {0}", state));
             state = GameState.CrossTurn;  //防止阻塞
         }
+    }
+
+    public static TurnResult Judging(List<List<ChessType>> board)
+    {
+        bool has_empty = false;  // 判平局用
+        ChessType flagged_chess_type;
+        bool connected;
+        #region 遍历行和判断是否已下满（不break，全量遍历）
+        for (int i = 0; i < rowColCount; i++)
+        {
+            flagged_chess_type = board[i][0];
+            connected = true;
+            for (int j = 0; j < rowColCount; j++)
+            {
+                var chess_type = board[i][j];
+                if (chess_type == ChessType.Empty)
+                {
+                    has_empty = true;
+                }
+                if (chess_type == ChessType.Empty || chess_type != flagged_chess_type)
+                {
+                    connected = false;
+                }
+            }
+            if (connected)
+            {
+                var result = new TurnResult
+                {
+                    connectedType = ConnectedType.Row,
+                    num = i,
+                };
+                result.SetResultByChessType(flagged_chess_type);
+                return result;
+            }
+        }
         #endregion
+        #region 遍历列
+        for (int i = 0; i < rowColCount; i++)
+        {
+            flagged_chess_type = board[0][i];
+            connected = true;
+            for (int j = 0; j < rowColCount; j++)
+            {
+                var chess_type = board[j][i];
+                if (chess_type == ChessType.Empty || chess_type != flagged_chess_type)
+                {
+                    connected = false;
+                    break;
+                }
+            }
+            if (connected)
+            {
+                var result = new TurnResult
+                {
+                    connectedType = ConnectedType.Col,
+                    num = i,
+                };
+                result.SetResultByChessType(flagged_chess_type);
+                return result;
+            }
+        }
+        #endregion
+        #region 查看正对角线
+        flagged_chess_type = board[0][0];
+        connected = true;
+        for (int i = 0; i < rowColCount; i++)
+        {
+            var chess_type = board[i][i];
+            if (chess_type == ChessType.Empty || chess_type != flagged_chess_type)
+            {
+                connected = false;
+                break;
+            }
+        }
+        if (connected)
+        {
+            var result = new TurnResult
+            {
+                connectedType = ConnectedType.Diagonal,
+            };
+            result.SetResultByChessType(flagged_chess_type);
+            return result;
+        }
+        #endregion
+        #region 查看反对角线
+        flagged_chess_type = board[rowColCount - 1][0];
+        connected = true;
+        for (int i = 0; i < rowColCount; i++)
+        {
+            var chess_type = board[rowColCount - 1 - i][i];
+            if (chess_type == ChessType.Empty || chess_type != flagged_chess_type)
+            {
+                connected = false;
+                break;
+            }
+        }
+        if (connected)
+        {
+            var result = new TurnResult
+            {
+                connectedType = ConnectedType.AntiDiagonal,
+            };
+            result.SetResultByChessType(flagged_chess_type);
+            return result;
+        }
+        #endregion
+        #region 判平局
+        if (!has_empty)
+        {
+            var result = new TurnResult
+            {
+                resultType = TurnResultType.Draw,
+            };
+            return result;
+        }
+        #endregion
+        return new TurnResult
+        {
+            resultType = TurnResultType.Continue,
+        };
     }
 }
