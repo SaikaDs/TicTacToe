@@ -1,14 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.UI;
 using UnityEngine;
 
 public enum AILevel
 {
     Easy,  //简单难度，完全随机，且不堵救
-    Medium,  //中等难度，一半概率采取minimax算法，且会紧急堵救
-    Hard,  //高等难度，90%概率采取minimax算法，且会紧急堵救
+    Medium,  //中等难度，低概率采取minimax算法，且会紧急堵救
+    Hard,  //高等难度，高概率采取minimax算法，且会紧急堵救
 }
 
 public class OpponentAI : MonoBehaviour
@@ -33,9 +32,9 @@ public class OpponentAI : MonoBehaviour
                 case AILevel.Easy:
                     return 1.0f;
                 case AILevel.Medium:
-                    return 0.5f;
+                    return 0.8f;
                 case AILevel.Hard:
-                    return 0.1f;
+                    return 0.2f;
             }
             return 0.5f;
         }
@@ -168,7 +167,7 @@ public class OpponentAI : MonoBehaviour
     }
 
     /// <summary>
-    /// 寻找
+    /// 寻找两子相连
     /// </summary>
     /// <param name="PlaceSeriously"></param>
     /// <param name=""></param>
