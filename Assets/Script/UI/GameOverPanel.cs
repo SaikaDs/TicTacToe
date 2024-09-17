@@ -15,10 +15,20 @@ public class GameOverPanel : MonoBehaviour
     GameObject drawText;
     [SerializeField]
     TextMeshProUGUI text;
+    [SerializeField]
+    AudioClip winAudio;
+    [SerializeField]
+    AudioClip loseAudio;
+    [SerializeField]
+    AudioClip drawAudio;
+
+    AudioSource audioSource;
+    const float gameOverAudioDelayTime = 1.0f;
 
     private void Awake()
     {
         GameSystem.Instance.onGameStateChange += OnGameStateChange;
+        audioSource = GetComponent<AudioSource>();
     }
 
 
@@ -35,10 +45,15 @@ public class GameOverPanel : MonoBehaviour
             if (GameSystem.Instance.playerCamp == ChessType.Cross)
             {
                 text.text = "你赢了";
+                audioSource.clip = winAudio;
+                audioSource.PlayDelayed(gameOverAudioDelayTime);
+
             }
             else
             {
                 text.text = "你输了";
+                audioSource.clip = loseAudio;
+                audioSource.PlayDelayed(gameOverAudioDelayTime);
             }
         }
         else if (state == GameState.CircleWinner)
@@ -52,10 +67,14 @@ public class GameOverPanel : MonoBehaviour
             if (GameSystem.Instance.playerCamp == ChessType.Circle)
             {
                 text.text = "你赢了";
+                audioSource.clip = winAudio;
+                audioSource.PlayDelayed(gameOverAudioDelayTime);
             }
             else
             {
                 text.text = "你输了";
+                audioSource.clip = loseAudio;
+                audioSource.PlayDelayed(gameOverAudioDelayTime);
             }
         }
         else if (state == GameState.Draw)
@@ -67,6 +86,8 @@ public class GameOverPanel : MonoBehaviour
             cross.SetActive(false);
             circle.SetActive(false);
             text.text = "平局";
+            audioSource.clip = drawAudio;
+            audioSource.PlayDelayed(gameOverAudioDelayTime);
         }
         else
         {
