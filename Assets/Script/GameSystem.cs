@@ -118,9 +118,25 @@ public class GameSystem : MonoBehaviour
         private set { _playerCamp = value; }
     }
 
+    bool _isTwoPlayers;
+
+
+    public Action onTwoPlayersChange;
+    public bool isTwoPlayers
+    {
+        get { return _isTwoPlayers; }
+        set
+        {
+            bool need_signal = _isTwoPlayers != value;
+            _isTwoPlayers = value;
+            if (need_signal) onTwoPlayersChange?.Invoke();
+        }
+    }
+
     private void Awake()
     {
         Instance = this;
+        _isTwoPlayers = false;
         boardModel = GenerateEmptyBoardModel();
     }
 

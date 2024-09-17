@@ -32,6 +32,7 @@ public class LevelDropDown : MonoBehaviour
 
     void OnDropdownValueChanged(int index)
     {
+        GameSystem.Instance.isTwoPlayers = false;
         // 根据index调用相应的方法
         switch (index)
         {
@@ -43,6 +44,9 @@ public class LevelDropDown : MonoBehaviour
                 break;
             case 2:
                 opponentAI.SetLevel(AILevel.Hard);
+                break;
+            case 3:
+                GameSystem.Instance.isTwoPlayers = true;
                 break;
         }
     }

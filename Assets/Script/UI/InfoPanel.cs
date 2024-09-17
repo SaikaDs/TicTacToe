@@ -28,7 +28,11 @@ public class InfoPanel : MonoBehaviour
                 break;
             case GameState.CrossTurn:
                 cross.SetActive(true);
-                if (GameSystem.Instance.playerCamp == ChessType.Cross)
+                if (GameSystem.Instance.isTwoPlayers)
+                {
+                    text.text = "     ÂÖµ½ÄãÁË";
+                }
+                else if (GameSystem.Instance.playerCamp == ChessType.Cross)
                 {
                     text.text = "     ÂÖµ½ÄãÁË";
                 }
@@ -39,7 +43,11 @@ public class InfoPanel : MonoBehaviour
                 break;
             case GameState.CircleTurn:
                 circle.SetActive(true);
-                if (GameSystem.Instance.playerCamp == ChessType.Circle)
+                if (GameSystem.Instance.isTwoPlayers)
+                {
+                    text.text = "     ÂÖµ½ÄãÁË";
+                }
+                else if (GameSystem.Instance.playerCamp == ChessType.Circle)
                 {
                     text.text = "     ÂÖµ½ÄãÁË";
                 }
@@ -49,7 +57,11 @@ public class InfoPanel : MonoBehaviour
                 }
                 break;
             case GameState.CrossWinner:
-                if (GameSystem.Instance.playerCamp == ChessType.Cross)
+                if (GameSystem.Instance.isTwoPlayers)
+                {
+                    text.text = "¹§Ï²£¡";
+                }
+                else if (GameSystem.Instance.playerCamp == ChessType.Cross)
                 {
                     text.text = "¹§Ï²£¡";
                 }
@@ -59,7 +71,11 @@ public class InfoPanel : MonoBehaviour
                 }
                 break;
             case GameState.CircleWinner:
-                if (GameSystem.Instance.playerCamp == ChessType.Circle)
+                if (GameSystem.Instance.isTwoPlayers)
+                {
+                    text.text = "¹§Ï²£¡";
+                }
+                else if (GameSystem.Instance.playerCamp == ChessType.Circle)
                 {
                     text.text = "¹§Ï²£¡";
                 }

@@ -80,6 +80,7 @@ public class OpponentAI : MonoBehaviour
 
     void OnGameStateChange(GameState state)
     {
+        if (GameSystem.Instance.isTwoPlayers) return;
         if ((state == GameState.CrossTurn && GetCamp() == ChessType.Cross) || (state == GameState.CircleTurn && GetCamp() == ChessType.Circle))
         {
             if (inThinking)

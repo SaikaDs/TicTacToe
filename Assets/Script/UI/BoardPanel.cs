@@ -44,6 +44,7 @@ public class BoardPanel : MonoBehaviour
     {
         var player_camp = GameSystem.Instance.playerCamp;
         bool active = (state == GameState.CrossTurn && player_camp == ChessType.Cross) || (state == GameState.CircleTurn && player_camp == ChessType.Circle);
+        if (GameSystem.Instance.isTwoPlayers) active = true;
         foreach (GameObject grid in gridList) 
         {
             grid.GetComponent<Grid>().SetStateActive(active);

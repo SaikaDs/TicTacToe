@@ -41,20 +41,30 @@ public class GameOverPanel : MonoBehaviour
             circle.SetActive(false);
             winnerText.SetActive(true);
             drawText.SetActive(false);
-            text.gameObject.SetActive(true);
-            if (GameSystem.Instance.playerCamp == ChessType.Cross)
+            if (GameSystem.Instance.isTwoPlayers)
             {
-                text.text = "ƒ„”Æ¡À";
+                text.gameObject.SetActive(false);
                 audioSource.clip = winAudio;
                 audioSource.PlayDelayed(gameOverAudioDelayTime);
-
             }
             else
             {
-                text.text = "ƒ„ ‰¡À";
-                audioSource.clip = loseAudio;
-                audioSource.PlayDelayed(gameOverAudioDelayTime);
+                text.gameObject.SetActive(true);
+                if (GameSystem.Instance.playerCamp == ChessType.Cross)
+                {
+                    text.text = "ƒ„”Æ¡À";
+                    audioSource.clip = winAudio;
+                    audioSource.PlayDelayed(gameOverAudioDelayTime);
+
+                }
+                else
+                {
+                    text.text = "ƒ„ ‰¡À";
+                    audioSource.clip = loseAudio;
+                    audioSource.PlayDelayed(gameOverAudioDelayTime);
+                }
             }
+
         }
         else if (state == GameState.CircleWinner)
         {
@@ -64,17 +74,26 @@ public class GameOverPanel : MonoBehaviour
             winnerText.SetActive(true);
             drawText.SetActive(false);
             text.gameObject.SetActive(true);
-            if (GameSystem.Instance.playerCamp == ChessType.Circle)
+            if (GameSystem.Instance.isTwoPlayers)
             {
-                text.text = "ƒ„”Æ¡À";
+                text.gameObject.SetActive(false);
                 audioSource.clip = winAudio;
                 audioSource.PlayDelayed(gameOverAudioDelayTime);
             }
             else
             {
-                text.text = "ƒ„ ‰¡À";
-                audioSource.clip = loseAudio;
-                audioSource.PlayDelayed(gameOverAudioDelayTime);
+                if (GameSystem.Instance.playerCamp == ChessType.Circle)
+                {
+                    text.text = "ƒ„”Æ¡À";
+                    audioSource.clip = winAudio;
+                    audioSource.PlayDelayed(gameOverAudioDelayTime);
+                }
+                else
+                {
+                    text.text = "ƒ„ ‰¡À";
+                    audioSource.clip = loseAudio;
+                    audioSource.PlayDelayed(gameOverAudioDelayTime);
+                }
             }
         }
         else if (state == GameState.Draw)
